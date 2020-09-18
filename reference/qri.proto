@@ -1,0 +1,387 @@
+syntax = 'proto3';
+
+service Dataset {
+  rpc Get (GetRequest) returns (Dataset) {}
+  rpc List (ListRequest) returns (ListResponse) {}
+  rpc Log (LogRequest) returns (LogResponse) {}
+
+  rpc Validate (ValidateRequest) returns (ValidateResponse) {}
+  rpc Stats (StatsRequest) returns (StatsResponse) {}
+  rpc Apply (ApplyRequest) returns (Dataset) {}
+}
+
+service DatasetWrite {
+  rpc Save (SaveRequest) returns (SaveReponse) {}
+  rpc Remove (RemoveRequest) returns (RemoveResponse) {}
+  rpc Rename (RenameRequest) returns (RenameResponse) {}
+}
+
+service Storage {
+  // rpc DagInfo ()
+}
+
+
+// 
+service WorkingDirectory {
+  rpc WDInit (WDInitRequest) returns (WDInitResponse) {}
+  rpc WDLink (WDLinkRequest) returns (WDLinkResponse) {}
+  rpc WDUnlink (WDLinkRequest) returns (WDLinkResponse) {}
+  rpc WDStatus (WDStatusRequest) returns (WDStatusReponse) {}
+  rpc WDRestore (WDLinkRequest) returns (WDLinkResponse) {}
+} 
+
+// WDLinkRequest provides parameters to the Checkout method.
+message WDLinkRequest {
+  required string Dir = 1;
+  required string Ref = 2;
+}
+
+message StatusResponse {
+  repeated 
+}
+
+// StatusItem is a component that has status representation on the filesystem
+message StatusItem {
+	required string SourceFile = 1;
+	required string Component = 2;
+	required string Type = 3;
+	required int Mtime = 4;
+	optional string Message = 5;
+}
+
+
+type CheckoutParams struct {
+    Dir string
+    Ref string
+}
+
+// DAGInfoParams defines parameters for the DAGInfo method
+type DAGInfoParams struct {
+    RefStr, Label string
+}
+
+// DatasetLogItem is a line item in a dataset response
+type DatasetLogItem struct {
+    // Decription of a dataset reference
+    dsref.VersionInfo
+    // Title field from the commit
+    CommitTitle string `json:"commitTitle,omitempty"`
+    // Message field from the commit
+    CommitMessage string `json:"commitMessage,omitempty"`
+}
+
+// DiffParams defines parameters for diffing two sources. 
+// There are three valid ways to use these parameters:
+//   1) both LeftSide and RightSide set, 
+//   2) only LeftSide set with a WorkingDir, 
+//   3) only LeftSide set with the UseLeftPrevVersion flag.
+type DiffParams struct {
+    // File paths or reference to datasets
+    LeftSide, RightSide string
+    // If not null, the working directory that the diff is using
+    WorkingDir string
+    // Whether to get the previous version of the left parameter
+    UseLeftPrevVersion bool
+
+    // Which component or part of a dataset to compare
+    Selector string
+
+    Remote string
+}
+
+// DiffResponse is the result of a call to diff
+type DiffResponse struct {
+    Stat       *DiffStat `json:"stat,omitempty"`
+    SchemaStat *DiffStat `json:"schemaStat,omitempty"`
+    Schema     []*Delta  `json:"schema,omitempty"`
+    Diff       []*Delta  `json:"diff,omitempty"`
+}
+
+// EnsureParams holds values for EnsureRef call
+type EnsureParams struct {
+    Dir string
+    Ref string
+}
+
+// FSIWriteParams encapsultes arguments for writing to an FSI-linked directory
+type FSIWriteParams struct {
+    Ref string
+    Ds  *dataset.Dataset
+}
+
+type GetConfigParams struct {
+    Field          string
+    WithPrivateKey bool
+    Format         string
+    Concise        bool
+}
+
+// GetParams defines parameters for looking up the head or body of a dataset
+type GetParams struct {
+    // Refstr to get, representing a dataset ref to be parsed
+    Refstr   string
+    Selector string
+
+    // read from a filesystem link instead of stored version
+    Format       string
+    FormatConfig dataset.FormatConfig
+
+    Limit, Offset int
+    All           bool
+
+    // outfile is a filename to save the dataset to
+    Outfile string
+    // whether to generate a filename from the dataset name instead
+    GenFilename bool
+    Remote      string
+}
+
+// GetResult combines data with it's hashed path
+type GetResult struct {
+    Ref       *dsref.Ref       `json:"ref"`
+    Dataset   *dataset.Dataset `json:"data"`
+    Bytes     []byte           `json:"bytes"`
+    Message   string           `json:"message"`
+    FSIPath   string           `json:"fsipath"`
+    Published bool             `json:"published"`
+}
+
+// LinkParams encapsulate parameters to the link method
+type LinkParams struct {
+    Dir string
+    Ref string
+}
+
+// ListParams is the general input for any sort of Paginated Request ListParams
+// define limits & offsets, not pages & page sizes. TODO - rename this to 
+// PageParams.
+type ListParams struct {
+  	ProfileID profile.ID
+  	Term      string
+  	Peername  string
+  	OrderBy   string
+  	Limit     int
+  	Offset    int
+  	// RPC is a horrible hack while we work to replace the net/rpc package
+  	// TODO - remove this
+  	RPC bool
+  	// Public only applies to listing datasets, shows only datasets that are
+  	// set to visible
+  	Public bool
+  	// ShowNumVersions only applies to listing datasets
+  	ShowNumVersions bool
+  	// EnsureFSIExists controls whether to ensure references in the repo have correct FSIPaths
+  	EnsureFSIExists bool
+  	// UseDscache controls whether to build a dscache to use to list the references
+  	UseDscache bool
+}
+
+// LogParams defines parameters for the Log method
+type LogParams struct {
+    ListParams
+    // Reference to data to fetch history for
+    Ref    string
+    Pull   bool
+    Source string
+}
+
+// PeerConnectionParamsPod defines parameters for defining a connection to a peer as plain-old-data
+type PeerConnectionParamsPod struct {
+    Peername  string
+    ProfileID string
+    NetworkID string
+    Multiaddr string
+}
+
+type PeerInfoParams struct {
+    Peername  string
+    ProfileID profile.ID
+    // Verbose adds network details from the p2p Peerstore
+    Verbose bool
+}
+
+type PeerListParams struct {
+    Limit, Offset int
+    // Cached == true will return offline peers from the repo
+    // as well as online peers, default is to list connected peers only
+    Cached bool
+}
+
+// PeerRefsParams defines params for the GetReferences method
+type PeerRefsParams struct {
+    PeerID string
+    Limit  int
+    Offset int
+}
+
+// PlainLogsParams enapsulates parameters for the PlainLogs methods
+type PlainLogsParams struct {
+}
+
+// PreviewParams provides arguments to the preview method
+type PreviewParams struct {
+    RemoteName string
+    Ref        string
+}
+
+// PullParams encapsulates parameters to the add command
+type PullParams struct {
+    Ref      string
+    LinkDir  string
+    Remote   string // remote to attempt to pull from
+    LogsOnly bool   // only fetch logbook data
+}
+
+// PushParams encapsulates parmeters for dataset publication
+type PushParams struct {
+    Ref        string
+    RemoteName string
+    // All indicates all versions of a dataset and the dataset namespace should
+    // be either published or removed
+    All bool
+}
+
+// RefListParams encapsulates parameters for requests to a single reference that will produce a paginated result
+type RefListParams struct {
+    // String value of a reference
+    Ref string
+    // Pagination Parameters
+    Offset, Limit int
+}
+
+// RemoveParams defines parameters for remove command
+type RemoveParams struct {
+    Ref       string
+    Revision  dsref.Rev
+    KeepFiles bool
+    Force     bool
+}
+
+type RemoveResponse struct {
+    Ref        string
+    NumDeleted int
+    Message    string
+    Unlinked   bool
+}
+
+type RenameParams struct {
+    Current, Next string
+}
+
+type RenderParams struct {
+    // Ref is a string reference to the dataset to render
+    Ref string
+    // Optionally pass an entire dataset in for rendering, if providing a dataset,
+    // the Ref field must be empty
+    Dataset *dataset.Dataset
+    // Optional template override
+    Template []byte
+    // If true,
+    UseFSI bool
+    // Output format. defaults to "html"
+    OutFormat string
+    // remote resolver to use
+    Remote string
+}
+
+type SQLQueryParams struct {
+    Query        string
+    OutputFormat string
+    ResolverMode string
+}
+
+type SaveParams struct {
+    // dataset supplies params directly, all other param fields override values
+    // supplied by dataset
+    Dataset *dataset.Dataset
+
+    // dataset reference string, the name to save to
+    Ref string
+    // commit title, defaults to a generated string based on diff
+    Title string
+    // commit message, defaults to blank
+    Message string
+    // path to body data
+    BodyPath string
+    // absolute path or URL to the list of dataset files or components to load
+    FilePaths []string
+    // secrets for transform execution
+    Secrets map[string]string
+    // optional writer to have transform script record standard output to
+    // note: this won't work over RPC, only on local calls
+    ScriptOutput io.Writer
+
+    // Replace writes the entire given dataset as a new snapshot instead of
+    // applying save params as augmentations to the existing history
+    Replace bool
+    // option to make dataset private. private data is not currently implimented,
+    // see https://github.com/qri-io/qri/issues/291 for updates
+    Private bool
+    // run without saving, returning results
+    DryRun bool
+    // if true, res.Dataset.Body will be a fs.file of the body
+    ReturnBody bool
+    // if true, convert body to the format of the previous version, if applicable
+    ConvertFormatToPrev bool
+    // string of references to recall before saving
+    Recall string
+    // comma separated list of component names to delete before saving
+    Drop string
+    // force a new commit, even if no changes are detected
+    Force bool
+    // save a rendered version of the template along with the dataset
+    ShouldRender bool
+    // new dataset only, don't create a commit on an existing dataset, name will be unused
+    NewName bool
+    // whether to create a new dscache if none exists
+    UseDscache bool
+}
+
+type SearchParams struct {
+    QueryString string `json:"q"`
+    Limit       int    `json:"limit,omitempty"`
+    Offset      int    `json:"offset,omitempty"`
+}
+
+type SearchResult struct {
+    Type, ID string
+    URL      string
+    Value    *dataset.Dataset
+}
+
+type SetupParams struct {
+    // a configuration is required. defaults to config.DefaultConfig()
+    Config *config.Config
+    // where to initialize qri repository
+    RepoPath string
+    // submit new username to the configured registry
+    Register bool
+    // overwrite any existing repo, erasing all data and deleting private keys
+    // this is almost always a bad idea
+    Overwrite bool
+    // attempt to setup an IFPS repo
+    SetupIPFS           bool
+    SetupIPFSConfigData []byte
+    // setup requires a crypto source
+    Generator gen.CryptoGenerator
+}
+
+type StatsParams struct {
+    // string representation of a dataset reference
+    Ref string
+    // if we get a Dataset from the params, then we do not have to
+    // attempt to open a dataset from the reference
+    Dataset *dataset.Dataset
+}
+
+type StatsResponse struct {
+    StatsBytes []byte
+}
+
+type ValidateDatasetParams struct {
+    Ref string
+    // URL          string
+    BodyFilename      string
+    SchemaFilename    string
+    StructureFilename string
+}

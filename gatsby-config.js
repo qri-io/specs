@@ -13,7 +13,8 @@ module.exports = {
 
         sidebarCategories: {
           null: [
-            'index'
+            'index',
+            'glossary'
           ],
           Concepts: [
             'concepts/profiles',
@@ -23,7 +24,11 @@ module.exports = {
           Dataset: [
             'dataset/index'
           ],
+          Runtime: [
+            'runtime/index'
+          ],
           Subsystems: [
+            'subsystems/index',
             'subsystems/dslist',
             'subsystems/dsync',
             'subsystems/fsi',
@@ -31,9 +36,6 @@ module.exports = {
             'subsystems/p2p',
             'subsystems/qfs',
             'subsystems/remote'
-          ],
-          Runtime: [
-            'runtime/index'
           ]
         }
       }
