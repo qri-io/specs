@@ -1,16 +1,19 @@
 syntax = 'proto3';
 
-service Dataset {
-  rpc Get (GetRequest) returns (Dataset) {}
-  rpc List (ListRequest) returns (ListResponse) {}
-  rpc Log (LogRequest) returns (LogResponse) {}
 
+service DatasetRead {
+  rpc List (ListRequest) returns (ListResponse) {}
+
+  rpc Get (GetRequest) returns (Dataset) {}
+  rpc GetBody (BodyRequest) returns (stream Row) {}
+
+  rpc Log (LogRequest) returns (LogResponse) {}
   rpc Validate (ValidateRequest) returns (ValidateResponse) {}
   rpc Stats (StatsRequest) returns (StatsResponse) {}
-  rpc Apply (ApplyRequest) returns (Dataset) {}
 }
 
 service DatasetWrite {
+  rpc Apply (ApplyRequest) returns (Dataset) {}
   rpc Save (SaveRequest) returns (SaveReponse) {}
   rpc Remove (RemoveRequest) returns (RemoveResponse) {}
   rpc Rename (RenameRequest) returns (RenameResponse) {}
@@ -20,6 +23,16 @@ service Storage {
   // rpc DagInfo ()
 }
 
+service Resolve {
+  rpc Resolve (ResolveRequest) returns (DsRef) {}
+}
+
+service Remote {
+  rpc Resolve (ResolveRequest) returns (DsRef) {}
+  rpc RemPush (PushRequest) returns (PushResponse) {}
+  rpc RemPull (PullResponse) returns (PullResponse) {}
+  rpc RemRemove (RemoveRequest) returns (RemoveRequest) {}
+}
 
 // 
 service WorkingDirectory {
@@ -36,23 +49,35 @@ message WDLinkRequest {
   required string Ref = 2;
 }
 
+message FSICheckoutParams {
+  required DsRef Ref  = 1;
+  required string Dir = 2;
+}
+
 message StatusResponse {
   repeated 
 }
 
 // StatusItem is a component that has status representation on the filesystem
 message StatusItem {
-	required string SourceFile = 1;
-	required string Component = 2;
-	required string Type = 3;
-	required int Mtime = 4;
-	optional string Message = 5;
+  required string SourceFile = 1;
+  required string Component = 2;
+  required string Type = 3;
+  required int Mtime = 4;
+  optional string Message = 5;
 }
 
-
-type CheckoutParams struct {
-    Dir string
-    Ref string
+message DsRef {
+  // canonical identifer for a dataset history
+  string InitID = 1;
+  // Username of dataset owner
+  string Username = 2;
+  // Unique name reference for this dataset
+  string Name = 3;
+  // ProfileID of dataset owner
+  string ProfileID = 4;
+  // Content-addressed path for this dataset
+  string Path = 5;
 }
 
 // DAGInfoParams defines parameters for the DAGInfo method
@@ -116,8 +141,7 @@ type GetConfigParams struct {
     Concise        bool
 }
 
-// GetParams defines parameters for looking up the head or body of a dataset
-type GetParams struct {
+message GetParams {
     // Refstr to get, representing a dataset ref to be parsed
     Refstr   string
     Selector string

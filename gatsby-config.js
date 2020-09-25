@@ -9,7 +9,7 @@ module.exports = {
         siteName: 'Qri Specs',
         description: 'Qri Core Specification',
         twitterHandle: 'qri_io',
-        youtubeUrl: 'https://www.youtube.com/channel/UC7E3_hURgFO2mVCLDwPSyOQ',
+        youtubeURL: 'https://www.youtube.com/channel/UC7E3_hURgFO2mVCLDwPSyOQ',
 
         sidebarCategories: {
           null: [
@@ -17,12 +17,15 @@ module.exports = {
             'glossary'
           ],
           Concepts: [
+            'concepts/keys',
             'concepts/profiles',
-            'concepts/references',
             'concepts/registries'
           ],
-          Dataset: [
-            'dataset/index'
+          Datasets: [
+            'dataset/index',
+            'dataset/data-types',
+            'dataset/components',
+            'dataset/references'
           ],
           Runtime: [
             'runtime/index'

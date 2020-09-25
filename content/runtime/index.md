@@ -17,8 +17,8 @@ Creating an instance requires a valid qri configuration, which includes
 An _instance method_ (or just "method" for short) is a function defined on an instance. Methods are user-facing abstractions of business logic like `Save` or `Remove`.
 
 
-## Services
-A qri _service_ is a logical grouping of _methods_ that relate to one another. Long-running qri processes can make methods available as Remote Procedure Calls (RPC) over a network socket.
+## Methods
+Qri _methods_ are a logical grouping of functions that relate to one another. Long-running qri processes can make methods available as Remote Procedure Calls (RPC) over a network socket. In this document we define methods as a gRPC service. For example:
 
 ```protobuf:title=Dataset Service
 service DatasetWrite {
