@@ -17,9 +17,10 @@ module.exports = {
             'glossary'
           ],
           Concepts: [
-            'concepts/keys',
-            'concepts/profiles',
-            'concepts/registries'
+            'concepts/collaboration'
+            // 'concepts/keys',
+            // 'concepts/profiles',
+            // 'concepts/registries'
           ],
           Datasets: [
             'dataset/index',
