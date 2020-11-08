@@ -16,22 +16,25 @@ module.exports = {
             'index',
             'glossary'
           ],
-          Concepts: [
+          'Concepts': [
             'concepts/collaboration'
             // 'concepts/keys',
             // 'concepts/profiles',
             // 'concepts/registries'
           ],
-          Datasets: [
+          'Datasets': [
             'dataset/index',
             'dataset/data-types',
             'dataset/components',
             'dataset/references'
           ],
-          Runtime: [
-            'runtime/index'
+          'Data Structures': [
+            'data_structures/key',
+            'data_structures/profile',
+            'data_structures/oplog',
+            'data_structures/capability_token'
           ],
-          Subsystems: [
+          'Subsystems': [
             'subsystems/index',
             'subsystems/dslist',
             'subsystems/dsync',
@@ -40,6 +43,9 @@ module.exports = {
             'subsystems/p2p',
             'subsystems/qfs',
             'subsystems/remote'
+          ],
+          'Runtime': [
+            'runtime/index'
           ]
         }
       }
